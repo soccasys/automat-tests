@@ -5,4 +5,4 @@ all: clean
 clean:
 	rm -rf python-lib/automat/*.pyc python-lib/automat/test/*.pyc
 	-killall -q build-automat-db
-	rm -rf ../bin ../pkg ../automat-db
+	rm -rf ../bin ../pkg ../automat-db build-automat.log
