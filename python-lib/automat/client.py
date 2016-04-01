@@ -12,6 +12,10 @@ class Automat:
 		p = Project(self.automat, name)
 		p.Get()
 		return p
+	def BuildRecord(self, hash):
+		p = BuildRecord(self.automat, hash)
+		p.Get()
+		return p
 
 class Component:
 	def __init__(self, name, url, revision):
