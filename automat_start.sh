@@ -11,5 +11,7 @@ mkdir -p automat-db/builds
 mkdir -p automat-db/records
 export GOPATH=`pwd`/automat-db/builds/build-automat
 ./bin/build-automat --example > automat-db/projects/build-automat
-/usr/bin/nohup ./bin/build-automat --serve `pwd`/automat-db < /dev/null > automat.log 2>&1 &
+# Careful with the next line, the order of the redirections are done must not be modified.
+# Using the wrong order can cause the python script invoking this shell script to hang indefinitely.
+nohup ./bin/build-automat --serve `pwd`/automat-db < /dev/null > automat.log 2>&1 &
 sleep 1
