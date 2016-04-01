@@ -1,1 +1,1 @@
-import automat.client
+from automat.client import Automat, Project, Component, BuildStep
