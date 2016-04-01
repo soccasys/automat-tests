@@ -105,6 +105,7 @@ class BuildRecord:
 	def Update(self, data):
 		# FIXME Check that the name is consistent
 		self.name = data['name']
+		self.duration = data['duration']
 		self.components = {}
 		for cname in data['components']:
 			self.components[cname] = CheckoutRecord(data['components'][cname]['name'], data['components'][cname]['url'], data['components'][cname]['revision'], data['components'][cname]['duration'], data['components'][cname]['status'])
