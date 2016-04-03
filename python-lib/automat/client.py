@@ -2,15 +2,39 @@
 import httplib
 import json
 
+class ProjectNotFound(Exception):
+	def __init__(self, code, reason):
+		self.code = code
+		self.reason = reason
+	def __str__(self):
+		return repr(self.code) + " " + repr(self.reason)
+
+class AutomatError(Exception):
+	def __init__(self, code, reason):
+		self.code = code
+		self.reason = reason
+	def __str__(self):
+		return repr(self.code) + " " + repr(self.reason)
+
 class Automat:
 	def __init__(self, host, port=80):
 		self.host = host
 		self.port = port
 		self.automat = httplib.HTTPConnection(host, port)
-	def Project(self, name):
+	def GetProject(self, name):
 		# FIXME Check that the name of the project is sane.
-		p = Project(self.automat, name)
+		p = Project(name, self.automat)
 		p.Get()
+		return p
+	def PutProject(self, p):
+		# FIXME Check that the name of the project is sane.
+		p.automat = self.automat
+		p.Put()
+		return p
+	def DeleteProject(self, name):
+		# FIXME Check that the name of the project is sane.
+		p = Project(name, self.automat)
+		p.Delete()
 		return p
 	def BuildRecord(self, hash):
 		p = BuildRecord(self.automat, hash)
@@ -30,10 +54,12 @@ class BuildStep:
 		self.command = command
 
 class Project:
-	def __init__(self, automat, name):
+	def __init__(self, name, automat=None):
 		self.automat = automat
 		# FIXME Check that the name of the project is sane.
 		self.name = name
+		self.components = {}
+		self.steps = []
 
 	def Get(self):
 		# Contact the automat server to get the description of the project.
@@ -41,10 +67,40 @@ class Project:
 		try:
 			self.automat.request("GET", "/projects/%s" % (self.name,))
 			response = self.automat.getresponse()
+			code, reason = response.status, response.reason
+			if code != 200:
+				raise ProjectNotFound(code, reason)
 			data = json.loads(response.read())
 		finally:
 			self.automat.close()
 		self.Update(data)
+
+	def Put(self):
+		# Contact the automat server to create/update the project.
+		self.automat.connect()
+		try:
+			pdata = json.dumps(self.Dump(), sort_keys=True, indent=4, separators=(',', ': '))
+			self.automat.request("PUT", "/projects/%s" % (self.name,), pdata)
+			response = self.automat.getresponse()
+			code, reason = response.status, response.reason
+			if code != 200:
+				raise AutomatError(code, reason)
+			data = json.loads(response.read())
+		finally:
+			self.automat.close()
+
+	def Delete(self):
+		# Contact the automat server to delete the project.
+		self.automat.connect()
+		try:
+			self.automat.request("DELETE", "/projects/%s" % (self.name,))
+			response = self.automat.getresponse()
+			code, reason = response.status, response.reason
+			if code != 200:
+				raise ProjectNotFound(code, reason)
+			#data = json.loads(response.read())
+		finally:
+			self.automat.close()
 
 	def Update(self, data):
 		# FIXME Check that the name is consistent
@@ -63,6 +119,11 @@ class Project:
 		try:
 			self.automat.request("GET", "/projects/%s/build" % (self.name,))
 			response = self.automat.getresponse()
+			code, reason = response.status, response.reason
+			if code == 404:
+				raise ProjectNotFound(code, reason)
+			if code != 200:
+				raise AutomatError(code, reason)
 			data = json.loads(response.read())
 		finally:
 			self.automat.close()
@@ -70,6 +131,34 @@ class Project:
 		b = BuildRecord(self.automat, data['hash'])
 		b.Update(data)
 		return b
+
+	def Dump(self):
+		# Return the project as a python dictionary that can be encoded in JSON.
+		data = {}
+		data['name'] = self.name
+		data['components'] = {}
+		for cname in self.components:
+			data['components'][cname] = {
+				"name": self.components[cname].name,
+				"url": self.components[cname].url,
+				"revision": self.components[cname].revision
+			}
+		data['steps'] = []
+		index = 0
+		for s in self.steps:
+			data['steps'].append({
+				"description": self.steps[index].description,
+				"directory": self.steps[index].directory,
+				"command": self.steps[index].command,
+			})
+			index += 1
+		return data
+
+	def AddComponent(self, name, url, revision):
+		self.components[name] = Component(name, url, revision)
+
+	def AddStep(self, description, directory, command):
+		self.steps.append(BuildStep(description, directory, command))
 
 class CheckoutRecord:
 	def __init__(self, name, url, revision, duration, status):

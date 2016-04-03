@@ -4,18 +4,23 @@
 
 Here is the list of changes to test/implement:
 
-* Error handling during checkout
-* Error handling during build
+* HTTP APIs to:
+  - Add a project                              [DONE]
+  - Update a project                           [DONE]
+  - Remove a project                           [DONE]
+  - Build a project                            [DONE]
 * Environment variables
-* Store build record
-* No build if no changes
+  - Step-level                                 [TODO] 
+  - Project-level                              [TODO]
+  - Database-level                             [TODO]
+* Error handling during checkout               [TODO]
+* Error handling during build                  [TODO]
+* Store build record                           [TODO]
+* No build if no changes                       [TODO]
 * Store build artifacts
 * Replay a build
 * Live monitoring of project files
-* HTTP APIs to:
-  - Add a project
-  - Update a project
-  - Remove a project
+* Asynchronous build
 * Periodic scheduling of build
 * E-mail notification (basic)
 * Compute the list of changes between two builds
