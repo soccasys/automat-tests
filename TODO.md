@@ -10,20 +10,20 @@ Here is the list of changes to test/implement:
   - Remove a project                           [DONE]
   - Build a project                            [DONE]
 * Environment variables
-  - Step-level                                 [TODO] 
-  - Project-level                              [TODO]
+  - Step-level                                 [DONE] 
+  - Project-level                              [DONE]
   - Database-level                             [TODO]
-* Error handling during checkout               [TODO]
-* Error handling during build                  [TODO]
+* Error handling during checkout               [DONE]
+* Error handling during build                  [DONE]
 * Store build record                           [TODO]
 * No build if no changes                       [TODO]
-* Store build artifacts
-* Replay a build
-* Live monitoring of project files
-* Asynchronous build
-* Periodic scheduling of build
-* E-mail notification (basic)
-* Compute the list of changes between two builds
+* Store build artifacts                        [TODO]
+* Replay a build                               [TODO]
+* Live monitoring of project files             [TODO]
+* Asynchronous build                           [TODO]
+* Periodic scheduling of build                 [TODO]
+* E-mail notification (basic)                  [TODO]
+* Compute the list of changes between builds   [TODO]
 
 ## Wish List
 
