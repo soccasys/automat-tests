@@ -2,5 +2,5 @@
 
 set -x
 cd ..
-killall -q build-automat
+killall -q automat-server
 rm -rf automat-db
