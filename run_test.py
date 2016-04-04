@@ -27,7 +27,7 @@ class AutomatTestCase(unittest.TestCase):
 class AUTOMAT_BFT_001(AutomatTestCase):
     def runTest(self):
         """Add, Modify, Build, Remove projects"""
-        s = automat.Automat("127.0.0.1", 8080)
+        s = automat.Server("127.0.0.1", 8080)
         with self.assertRaises(automat.ProjectNotFound) as cm:
             p = s.GetProject("brand-new-project")
         self.assertEqual(cm.exception.code, 404)
@@ -105,7 +105,7 @@ class AUTOMAT_BFT_001(AutomatTestCase):
 class AUTOMAT_BFT_002(AutomatTestCase):
     def runTest(self):
         """Error handling in the server"""
-        s = automat.Automat("127.0.0.1", 8080)
+        s = automat.Server("127.0.0.1", 8080)
         with self.assertRaises(automat.ProjectNotFound) as cm:
             p = s.GetProject("does-not-exist")
         self.assertEqual(cm.exception.code, 404)

@@ -16,7 +16,7 @@ class AutomatError(Exception):
 	def __str__(self):
 		return repr(self.code) + " " + repr(self.reason)
 
-class Automat:
+class Server:
 	def __init__(self, host, port=80):
 		self.host = host
 		self.port = port
