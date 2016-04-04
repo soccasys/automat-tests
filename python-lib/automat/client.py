@@ -48,10 +48,11 @@ class Component:
 		self.revision = revision
 
 class BuildStep:
-	def __init__(self, description, directory, command):
+	def __init__(self, description, directory, command, env):
 		self.description = description
 		self.directory = directory
 		self.command = command
+		self.env = env
 
 class Project:
 	def __init__(self, name, automat=None):
@@ -60,6 +61,7 @@ class Project:
 		self.name = name
 		self.components = {}
 		self.steps = []
+		self.env = {}
 
 	def Get(self):
 		# Contact the automat server to get the description of the project.
@@ -110,7 +112,7 @@ class Project:
 			self.components[cname] = Component(data['components'][cname]['name'], data['components'][cname]['url'], data['components'][cname]['revision'])
 		self.steps = []
 		for s in data['steps']:
-			self.steps.append(BuildStep(s['description'], s['directory'], s['command']))
+			self.steps.append(BuildStep(s['description'], s['directory'], s['command'], s['env']))
 		# FIXME Add support for the environment variables
 
 	def Build(self):
@@ -150,15 +152,20 @@ class Project:
 				"description": self.steps[index].description,
 				"directory": self.steps[index].directory,
 				"command": self.steps[index].command,
+				"env": self.steps[index].env,
 			})
 			index += 1
+		data['env'] = self.env
 		return data
 
 	def AddComponent(self, name, url, revision):
 		self.components[name] = Component(name, url, revision)
 
-	def AddStep(self, description, directory, command):
-		self.steps.append(BuildStep(description, directory, command))
+	def AddStep(self, description, directory, command, env):
+		self.steps.append(BuildStep(description, directory, command, env))
+
+	def SetEnv(self, name, value):
+		self.env[name] = value
 
 class CheckoutRecord:
 	def __init__(self, name, url, revision, duration, status):

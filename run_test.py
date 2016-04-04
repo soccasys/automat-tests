@@ -26,7 +26,7 @@ class AutomatTestCase(unittest.TestCase):
 
 class AUTOMAT_BFT_001(AutomatTestCase):
     def runTest(self):
-        """Add, Modify, Remove projects"""
+        """Add, Modify, Build, Remove projects"""
         s = automat.Automat("127.0.0.1", 8080)
         with self.assertRaises(automat.ProjectNotFound) as cm:
             p = s.GetProject("brand-new-project")
@@ -35,7 +35,7 @@ class AUTOMAT_BFT_001(AutomatTestCase):
         p = automat.Project("brand-new-project")
         p.AddComponent("src/github.com/soccasys/builder", "https://github.com/soccasys/builder.git", "master")
         p.AddComponent("src/github.com/soccasys/build-automat", "https://github.com/soccasys/build-automat.git", "master")
-        p.AddStep("Build All", ".", [ "go", "install", "github.com/soccasys/build-automat"])
+        p.AddStep("Build All", ".", [ "go", "install", "github.com/soccasys/build-automat"], {})
         self.assertEqual(p.name, "brand-new-project")
         self.assertTrue("src/github.com/soccasys/build-automat" in p.components)
         self.assertTrue("src/github.com/soccasys/builder" in p.components)
@@ -71,7 +71,7 @@ class AUTOMAT_BFT_001(AutomatTestCase):
         self.assertEqual(p3.steps[0].command[0], "go")
         self.assertEqual(p3.steps[0].command[1], "install")
         self.assertEqual(p3.steps[0].command[2], "github.com/soccasys/build-automat")
-        # Build the project
+        # Build the project, without setting the environment variable => FAILURE
         r = p2.Build()
         self.assertEqual(r.name, "brand-new-project")
         self.assertTrue(r.duration > 0)
@@ -83,11 +83,19 @@ class AUTOMAT_BFT_001(AutomatTestCase):
         self.assertTrue(r.components["src/github.com/soccasys/builder"].status == "BUILD_OK")
         self.assertTrue(len(r.steps) == 1)
         self.assertEqual(r.steps[0].directory, ".")
-        self.assertEqual(r.steps[0].status, "BUILD_OK")
+        self.assertEqual(r.steps[0].status, "BUILD_FAILED")
         self.assertTrue(len(r.steps[0].command) == 3)
         self.assertEqual(r.steps[0].command[0], "go")
         self.assertEqual(r.steps[0].command[1], "install")
         self.assertEqual(r.steps[0].command[2], "github.com/soccasys/build-automat")
+	# TODO Build the project, with the environment variable => SUCCESS
+        p2 = automat.Project("brand-new-project")
+        p2.AddComponent("src/github.com/soccasys/builder", "https://github.com/soccasys/builder.git", "master")
+        p2.AddComponent("src/github.com/soccasys/build-automat", "https://github.com/soccasys/build-automat.git", "master")
+        p2.AddStep("Build All", ".", [ "go", "install", "github.com/soccasys/build-automat"], {'GOPATH': '$BUILD_ROOT'})
+	s.PutProject(p2)
+	r = p2.Build()
+        self.assertEqual(r.steps[0].status, "BUILD_OK")
         # Delete the project
         s.DeleteProject("brand-new-project")
         with self.assertRaises(automat.ProjectNotFound) as cm:
